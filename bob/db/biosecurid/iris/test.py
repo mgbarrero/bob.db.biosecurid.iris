@@ -67,9 +67,59 @@ class BiosecuridDatabaseTest(unittest.TestCase):
     self.assertEqual(len(db.objects(protocol='A', groups='eval', purposes='probe', model_ids=[1601,1602], classes='impostor')), 320)
 
 
+    # Left
+    self.assertEqual(len(db.objects(protocol='Left')), 6400)
+    self.assertEqual(len(db.objects(protocol='Left', groups='world')), 2400)
+    self.assertEqual(len(db.objects(protocol='Left', groups='dev')), 2400)
+    self.assertEqual(len(db.objects(protocol='Left', groups='dev', purposes='enrol')), 1096)
+    self.assertEqual(len(db.objects(protocol='Left', groups='dev', purposes='probe')), 1304)
+    self.assertEqual(len(db.objects(protocol='Left', groups='dev', purposes='probe', classes='client')), 1096)
+    self.assertEqual(len(db.objects(protocol='Left', groups='dev', purposes='probe', classes='impostor')), 208)
+    self.assertEqual(len(db.objects(protocol='Left', groups='dev', purposes='probe', model_ids=[1302])), 216)
+    self.assertEqual(len(db.objects(protocol='Left', groups='dev', purposes='probe', model_ids=[1302], classes='client')), 8)
+    self.assertEqual(len(db.objects(protocol='Left', groups='dev', purposes='probe', model_ids=[1302], classes='impostor')), 208)
+    self.assertEqual(len(db.objects(protocol='Left', groups='dev', purposes='probe', model_ids=[1302,1304])), 224)
+    self.assertEqual(len(db.objects(protocol='Left', groups='dev', purposes='probe', model_ids=[1302,1304], classes='client')), 16)
+    self.assertEqual(len(db.objects(protocol='Left', groups='dev', purposes='probe', model_ids=[1302,1304], classes='impostor')), 208)
+    self.assertEqual(len(db.objects(protocol='Left', groups='eval')), 1600)
+    self.assertEqual(len(db.objects(protocol='Left', groups='eval', purposes='enrol')), 720)
+    self.assertEqual(len(db.objects(protocol='Left', groups='eval', purposes='probe')), 880)
+    self.assertEqual(len(db.objects(protocol='Left', groups='eval', purposes='probe', classes='client')), 720)
+    self.assertEqual(len(db.objects(protocol='Left', groups='eval', purposes='probe', classes='impostor')), 160)
+    self.assertEqual(len(db.objects(protocol='Left', groups='eval', purposes='probe', model_ids=[1602])), 168)
+    self.assertEqual(len(db.objects(protocol='Left', groups='eval', purposes='probe', model_ids=[1602], classes='client')), 8)
+    self.assertEqual(len(db.objects(protocol='Left', groups='eval', purposes='probe', model_ids=[1602], classes='impostor')), 160)
+    self.assertEqual(len(db.objects(protocol='Left', groups='eval', purposes='probe', model_ids=[1602,1604])), 176)
+    self.assertEqual(len(db.objects(protocol='Left', groups='eval', purposes='probe', model_ids=[1602,1604], classes='client')), 16)
+    self.assertEqual(len(db.objects(protocol='Left', groups='eval', purposes='probe', model_ids=[1602,1604], classes='impostor')), 160)
 
 
 
+    # Right
+    self.assertEqual(len(db.objects(protocol='Right')), 6400)
+    self.assertEqual(len(db.objects(protocol='Right', groups='world')), 2400)
+    self.assertEqual(len(db.objects(protocol='Right', groups='dev')), 2400)
+    self.assertEqual(len(db.objects(protocol='Right', groups='dev', purposes='enrol')), 1104)
+    self.assertEqual(len(db.objects(protocol='Right', groups='dev', purposes='probe')), 1296)
+    self.assertEqual(len(db.objects(protocol='Right', groups='dev', purposes='probe', classes='client')), 1104)
+    self.assertEqual(len(db.objects(protocol='Right', groups='dev', purposes='probe', classes='impostor')), 192)
+    self.assertEqual(len(db.objects(protocol='Right', groups='dev', purposes='probe', model_ids=[1301])), 200)
+    self.assertEqual(len(db.objects(protocol='Right', groups='dev', purposes='probe', model_ids=[1301], classes='client')), 8)
+    self.assertEqual(len(db.objects(protocol='Right', groups='dev', purposes='probe', model_ids=[1301], classes='impostor')), 192)
+    self.assertEqual(len(db.objects(protocol='Right', groups='dev', purposes='probe', model_ids=[1301,1303])), 208)
+    self.assertEqual(len(db.objects(protocol='Right', groups='dev', purposes='probe', model_ids=[1301,1303], classes='client')), 16)
+    self.assertEqual(len(db.objects(protocol='Right', groups='dev', purposes='probe', model_ids=[1301,1303], classes='impostor')), 192)
+    self.assertEqual(len(db.objects(protocol='Right', groups='eval')), 1600)
+    self.assertEqual(len(db.objects(protocol='Right', groups='eval', purposes='enrol')), 720)
+    self.assertEqual(len(db.objects(protocol='Right', groups='eval', purposes='probe')), 880)
+    self.assertEqual(len(db.objects(protocol='Right', groups='eval', purposes='probe', classes='client')), 720)
+    self.assertEqual(len(db.objects(protocol='Right', groups='eval', purposes='probe', classes='impostor')), 160)
+    self.assertEqual(len(db.objects(protocol='Right', groups='eval', purposes='probe', model_ids=[1601])), 168)
+    self.assertEqual(len(db.objects(protocol='Right', groups='eval', purposes='probe', model_ids=[1601], classes='client')), 8)
+    self.assertEqual(len(db.objects(protocol='Right', groups='eval', purposes='probe', model_ids=[1601], classes='impostor')), 160)
+    self.assertEqual(len(db.objects(protocol='Right', groups='eval', purposes='probe', model_ids=[1601,1603])), 176)
+    self.assertEqual(len(db.objects(protocol='Right', groups='eval', purposes='probe', model_ids=[1601,1603], classes='client')), 16)
+    self.assertEqual(len(db.objects(protocol='Right', groups='eval', purposes='probe', model_ids=[1601,1603], classes='impostor')), 160)
 
   def test03_driver_api(self):
 
@@ -77,6 +127,6 @@ class BiosecuridDatabaseTest(unittest.TestCase):
     self.assertEqual(main('biosecurid.iris dumplist --self-test'.split()), 0)
     self.assertEqual(main('biosecurid.iris dumplist --protocol=A --class=client --group=dev --purpose=enrol --client=1301 --self-test'.split()), 0)
     self.assertEqual(main('biosecurid.iris checkfiles --self-test'.split()), 0)
-    self.assertEqual(main('biosecurid.iris reverse user1001/session0001/u1001s0001_ir0001 --self-test'.split()), 0)
+    self.assertEqual(main('biosecurid.iris reverse user1001/session0001/u1001s0001_ir0001/right --self-test'.split()), 0)
     self.assertEqual(main('biosecurid.iris path 3011 --self-test'.split()), 0)
 

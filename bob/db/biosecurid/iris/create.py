@@ -40,7 +40,8 @@ def add_clients(session, verbose):
   if verbose: print("Adding users...")
   for g, group in enumerate(group_choices):
     for cid in users_list[g]:
-      if verbose>1: print("  Adding user '%d' on '%s' group..." % (cid,group))
+      if verbose>1: print("  Adding user '%d' on '%s' group" % (cid,group))
+      
       session.add(Client(cid, group))
 
 
@@ -48,10 +49,9 @@ def add_clients(session, verbose):
 def add_files(session, imagedir, verbose):
   """Add files to the BiosecurId database."""
 
-  def add_file(session, basename, userdir, sessiondir, realUser, realShot):
+  def add_file(session, basename, userdir, sessiondir, realUser, realShot, side):
     """Parse a single filename and add it to the list."""
-    session.add(File(realUser, os.path.join(userdir, sessiondir, basename), int(sessiondir[-1]), realShot))
-
+    session.add(File(realUser, os.path.join(userdir, sessiondir, basename, side), int(sessiondir[-1]), realShot, side))
 
   for userdir in os.listdir(imagedir):
     sdirs = os.listdir(os.path.join(imagedir,userdir))
@@ -70,30 +70,39 @@ def add_files(session, imagedir, verbose):
           if shotid == 1:
             realShot = 1
             realUser = 2*userid - 1 + 1000
+            side = 'right'
           elif shotid == 3:
             realShot = 2
             realUser = 2*userid - 1 + 1000
+            side = 'right'
           elif shotid == 5:
             realShot = 3
             realUser = 2*userid - 1 + 1000
+            side = 'right'
           elif shotid == 7:
             realShot = 4
             realUser = 2*userid - 1 + 1000
+            side = 'right'
           
           if shotid == 2:
             realShot = 1
             realUser = 2*userid + 1000
+            side = 'left'
           elif shotid == 4:
             realShot = 2
             realUser = 2*userid + 1000
+            side = 'left'
           elif shotid == 6:
             realShot = 3
             realUser = 2*userid + 1000
+            side = 'left'
           elif shotid == 8:
             realShot = 4
             realUser = 2*userid + 1000
-          add_file(session, basename, userdir, sessiondir, realUser, realShot)
-
+            side = 'left'
+          
+          add_file(session, basename, userdir, sessiondir, realUser, realShot, side)
+  
 
 
 
@@ -103,7 +112,7 @@ def add_protocols(session, verbose):
   # 1. DEFINITIONS
   enroll_session = [1, 2]
   client_probe_session = [3, 4]
-  protocols = ['A']
+  protocols = ['A', 'Right', 'Left']
 
   # 2. ADDITIONS TO THE SQL DATABASE
   protocolPurpose_list = [('world', 'train'), ('dev', 'enrol'), ('dev', 'probe'), ('eval', 'enrol'), ('eval', 'probe')]
@@ -114,7 +123,7 @@ def add_protocols(session, verbose):
     session.add(p)
     session.flush()
     session.refresh(p)
-
+    
     # Add protocol purposes
     for key in range(len(protocolPurpose_list)):
       purpose = protocolPurpose_list[key]
@@ -126,42 +135,84 @@ def add_protocols(session, verbose):
 
       # Add files attached with this protocol purpose
       if(key == 0): # world
-        q = session.query(File).join(Client).filter(Client.sgroup == 'world')
+        if proto == 'Right':
+          q = session.query(File).filter(File.side == 'right').join(Client).filter(Client.sgroup == 'world')
+        elif proto == 'Left':
+          q = session.query(File).filter(File.side == 'left').join(Client).filter(Client.sgroup == 'world')
+        else:
+          q = session.query(File).join(Client).filter(Client.sgroup == 'world')
         for k in q:
           if verbose>1: print("    Adding protocol file '%s'..." % (k.path))
           pu.files.append(k)
 
-      elif(key == 1): #dev enrol
-        q = session.query(File).join(Client).filter(Client.sgroup == 'clientDev').filter(File.session_id.in_(enroll_session))
+      elif(key == 1): #dev enroll
+        if proto == 'Right':
+          q = session.query(File).filter(File.side == 'right').join(Client).filter(Client.sgroup == 'clientDev').filter(File.session_id.in_(enroll_session))
+        elif proto == 'Left':
+          q = session.query(File).filter(File.side == 'left').join(Client).filter(Client.sgroup == 'clientDev').filter(File.session_id.in_(enroll_session))
+        else:
+          q = session.query(File).join(Client).filter(Client.sgroup == 'clientDev').filter(File.session_id.in_(enroll_session))
         for k in q:
           if verbose>1: print("    Adding protocol file '%s'..." % (k.path))
           pu.files.append(k)
 
       elif(key == 2): #dev probe
-        q = session.query(File).join(Client).filter(Client.sgroup == 'clientDev').filter(File.session_id.in_(client_probe_session))
+        if proto == 'Right':
+          q = session.query(File).filter(File.side == 'right').join(Client).filter(Client.sgroup == 'clientDev').filter(File.session_id.in_(client_probe_session))
+        elif proto == 'Left':
+          q = session.query(File).filter(File.side == 'left').join(Client).filter(Client.sgroup == 'clientDev').filter(File.session_id.in_(client_probe_session))
+        else:
+          q = session.query(File).join(Client).filter(Client.sgroup == 'clientDev').filter(File.session_id.in_(client_probe_session))
         for k in q:
           if verbose>1: print("    Adding protocol file '%s'..." % (k.path))
           pu.files.append(k)
-        q = session.query(File).join(Client).filter(Client.sgroup == 'impostorDev')
+        
+        for k in q:
+          if verbose>1: print("    Adding protocol file '%s'..." % (k.path))
+          pu.files.append(k)
+        if proto == 'Right':
+          q = session.query(File).filter(File.side == 'right').join(Client).filter(Client.sgroup == 'impostorDev')
+        elif proto == 'Left':
+          q = session.query(File).filter(File.side == 'left').join(Client).filter(Client.sgroup == 'impostorDev')
+        else:
+          q = session.query(File).join(Client).filter(Client.sgroup == 'impostorDev')
         for k in q:
           if verbose>1: print("    Adding protocol file '%s'..." % (k.path))
           pu.files.append(k)
 
       elif(key == 3): #test enrol
-        q = session.query(File).join(Client).filter(Client.sgroup == 'clientEval').filter(File.session_id.in_(enroll_session))
+        if proto == 'Right':
+          q = session.query(File).filter(File.side == 'right').join(Client).filter(Client.sgroup == 'clientEval').filter(File.session_id.in_(enroll_session))
+        elif proto == 'Left':
+          q = session.query(File).filter(File.side == 'left').join(Client).filter(Client.sgroup == 'clientEval').filter(File.session_id.in_(enroll_session))
+        else:
+          q = session.query(File).join(Client).filter(Client.sgroup == 'clientEval').filter(File.session_id.in_(enroll_session))
         for k in q:
           if verbose>1: print("    Adding protocol file '%s'..." % (k.path))
           pu.files.append(k)
 
       elif(key == 4): #test probe
-        q = session.query(File).join(Client).filter(Client.sgroup == 'clientEval').filter(File.session_id.in_(client_probe_session))
+        if proto == 'Right':
+          q = session.query(File).filter(File.side == 'right').join(Client).filter(Client.sgroup == 'clientEval').filter(File.session_id.in_(client_probe_session))
+        elif proto == 'Left':
+          q = session.query(File).filter(File.side == 'left').join(Client).filter(Client.sgroup == 'clientEval').filter(File.session_id.in_(client_probe_session))
+        else:
+          q = session.query(File).join(Client).filter(Client.sgroup == 'clientEval').filter(File.session_id.in_(client_probe_session))
         for k in q:
           if verbose>1: print("    Adding protocol file '%s'..." % (k.path))
           pu.files.append(k)
-        q = session.query(File).join(Client).filter(Client.sgroup == 'impostorEval')
+        
+        
+        if proto == 'Right':
+          q = session.query(File).filter(File.side == 'right').join(Client).filter(Client.sgroup == 'impostorEval')
+        elif proto == 'Left':
+          q = session.query(File).filter(File.side == 'left').join(Client).filter(Client.sgroup == 'impostorEval')
+        else:
+          q = session.query(File).join(Client).filter(Client.sgroup == 'impostorEval')
         for k in q:
           if verbose>1: print("    Adding protocol file '%s'..." % (k.path))
           pu.files.append(k)
+
 
 
 def create_tables(args):
@@ -205,6 +256,6 @@ def add_command(subparsers):
 
   parser.add_argument('-R', '--recreate', action='store_true', help="If set, I'll first erase the current database")
   parser.add_argument('-v', '--verbose', action='count', help="Do SQL operations in a verbose way?")
-  parser.add_argument('-D', '--imagedir', metavar='DIR', default='/Users/martagomezbarrero/Documents/BiosecurID/data/', help="Change the relative path to the directory containing the images of the BiosecurID database.")
+  parser.add_argument('-D', '--imagedir', metavar='DIR', default='/home/bob/dataIris/', help="Change the relative path to the directory containing the images of the BiosecurID database.")
 
   parser.set_defaults(func=create) #action

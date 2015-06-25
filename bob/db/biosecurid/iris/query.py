@@ -34,7 +34,7 @@ class Database(bob.db.verification.utils.SQLiteDatabase,bob.db.verification.util
   and for the data itself inside the database.
   """
 
-  def __init__(self, original_directory = None, original_extension = '.bmp'):
+  def __init__(self, original_directory = None, original_extension = '.jpg'):
     # call base class constructor
     bob.db.verification.utils.SQLiteDatabase.__init__(self, SQLITE_FILE, File)
     bob.db.verification.utils.Database.__init__(self, original_directory=original_directory, original_extension=original_extension)
@@ -74,6 +74,10 @@ class Database(bob.db.verification.utils.SQLiteDatabase,bob.db.verification.util
     does not have separate training, development and evaluation sets."""
 
     return Client.group_choices
+  
+  def client_types(self):
+    """Returns the names of the types."""
+    return Client.side_choices
 
   def clients(self, protocol=None, groups=None):
     """Returns a list of :py:class:`.Client` for the specific query by the user.

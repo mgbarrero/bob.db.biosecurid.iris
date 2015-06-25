@@ -44,7 +44,7 @@ class Client(Base):
   # "impostor evaluation" and "impostor test" in the original paper describing the database)
   group_choices = ('world', 'clientDev','impostorDev','clientEval','impostorEval')
   sgroup = Column(Enum(*group_choices)) # do NOT use group (SQL keyword)
-
+  
   def __init__(self, id, group):
     self.id = id
     self.sgroup = group
@@ -67,16 +67,20 @@ class File(Base, bob.db.verification.utils.File):
   session_id = Column(Integer)
   # Shot identifier
   shot_id = Column(Integer)
-
+  # Side identifier
+  side_choices = ('left', 'right')
+  side = Column(Enum(*side_choices)) 
+  
   # For Python: A direct link to the client object that this file belongs to
   client = relationship("Client", backref=backref("files", order_by=id))
 
-  def __init__(self, client_id, path, session_id, shot_id):
+  def __init__(self, client_id, path, session_id, shot_id, side):
     # call base class constructor
     bob.db.verification.utils.File.__init__(self, client_id = client_id, path = path)
 
     self.session_id = session_id
     self.shot_id = shot_id
+    self.side = side
 
 
 class Protocol(Base):
